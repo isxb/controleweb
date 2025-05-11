@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block back_button %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Dashboard
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Equipamentos Cadastrados</h2>
+    
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('lista_equipamentos') }}">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" name="patrimonio" placeholder="Patrimônio" value="{{ request.args.get('patrimonio', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" name="responsavel" placeholder="Responsável" value="{{ request.args.get('responsavel', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control cpf-input" name="cpf" placeholder="CPF" value="{{ request.args.get('cpf', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Patrimônio</th>
+                <th>Modelo</th>
+                <th>Responsável</th>
+                <th>CPF</th>
+                <th>Data Chegada</th>
+                <th>Acessórios</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for equip in equipamentos %}
+            <tr>
+                <td>{{ equip.patrimonio }}</td>
+                <td>{{ equip.modelo }}</td>
+                <td>{{ equip.responsavel.username if equip.responsavel else '--' }}</td>
+                <td>{{ equip.cpf|format_cpf }}</td>
+                <td>{{ equip.data_chegada.strftime('%d/%m/%Y') }}</td>
+                <td>
+                    {% if equip.carregador %}<span class="badge bg-secondary">Carregador</span>{% endif %}
+                    {% if equip.mochila %}<span class="badge bg-secondary">Mochila</span>{% endif %}
+                    {% if equip.mouse %}<span class="badge bg-secondary">Mouse</span>{% endif %}
+                </td>
+                <td>
+                    {% if equip.em_manutencao %}
+                        <span class="badge bg-warning">Manutenção</span>
+                    {% elif equip.data_retirada %}
+                        <span class="badge bg-success">Em uso</span>
+                    {% else %}
+                        <span class="badge bg-info">Disponível</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('visualizar_equipamento', id=equip.id) }}" class="btn btn-sm btn-info">Ver</a>
+                    {% if not equip.data_retirada and not equip.em_manutencao %}
+                        <a href="{{ url_for('registrar_manutencao', id=equip.id) }}" class="btn btn-sm btn-warning">Manutenção</a>
+                        {% if session['role'] in ['admin', 'main_admin'] %}
+                            <a href="{{ url_for('registrar_baixa', id=equip.id) }}" class="btn btn-sm btn-danger">Baixa</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cpfInputs = document.querySelectorAll('.cpf-input');
+    cpfInputs.forEach(input => {
+        input.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.substring(0, 11);
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            e.target.value = value;
+        });
+    });
+});
+</script>
+{% endblock %}

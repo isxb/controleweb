@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Cadastrar Novo Centro de Custo</h2>
+    <form method="POST" action="{{ url_for('cadastrar_centro_custo') }}">
+        <div class="mb-3">
+            <label for="codigo" class="form-label">Código</label>
+            <input type="text" class="form-control" id="codigo" name="codigo" required>
+        </div>
+        <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <input type="text" class="form-control" id="descricao" name="descricao" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{{ url_for('nova_solicitacao') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

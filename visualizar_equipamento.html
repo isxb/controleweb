@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block back_button %}
+<a href="{{ url_for('lista_equipamentos') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para Lista de Equipamentos
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Detalhes do Equipamento - {{ equipamento.patrimonio }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Modelo:</strong> {{ equipamento.modelo }}</p>
+                    <p><strong>Data de Chegada:</strong> {{ equipamento.data_chegada.strftime('%d/%m/%Y %H:%M') }}</p>
+                    <p><strong>Responsável:</strong> {{ equipamento.responsavel.username if equipamento.responsavel else '--' }}</p>
+                    <p><strong>CPF:</strong> {{ equipamento.cpf|format_cpf }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Matrícula:</strong> {{ equipamento.matricula if equipamento.matricula else '--' }}</p>
+                    <p><strong>Status:</strong>
+                        {% if equipamento.em_manutencao %}
+                            <span class="badge bg-warning">Em Manutenção</span>
+                        {% elif equipamento.data_retirada %}
+                            <span class="badge bg-success">Em uso</span>
+                        {% else %}
+                            <span class="badge bg-info">Disponível</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Acessórios:</strong>
+                        {% if equipamento.carregador %}<span class="badge bg-secondary">Carregador</span>{% endif %}
+                        {% if equipamento.mochila %}<span class="badge bg-secondary">Mochila</span>{% endif %}
+                        {% if equipamento.mouse %}<span class="badge bg-secondary">Mouse</span>{% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            {% if equipamento.data_devolucao %}
+            <div class="mt-4">
+                <h5>Informações de Devolução</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Data Devolução:</strong> {{ equipamento.data_devolucao.strftime('%d/%m/%Y %H:%M') }}</p>
+                        <p><strong>Motivo:</strong> {{ 'Troca por Defeito' if equipamento.motivo_devolucao == 'defeito' else 'Devolução por Demissão' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Acessórios Devolvidos:</strong> {{ equipamento.acessorios_devolvidos or 'Nenhum' }}</p>
+                        <p><strong>Desconto Aplicado:</strong> R$ {{ "%.2f"|format(equipamento.desconto_aplicado) }}</p>
+                    </div>
+                </div>
+                {% if equipamento.defeito_relatado %}
+                <div class="mt-2">
+                    <p><strong>Defeito Relatado:</strong></p>
+                    <p>{{ equipamento.defeito_relatado }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% if equipamento.em_manutencao %}
+            <div class="mt-4">
+                <h5>Informações de Manutenção</h5>
+                <p><strong>Problema Relatado:</strong></p>
+                <p>{{ equipamento.problemas_manutencao }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <h5>Documentos</h5>
+                <div class="btn-group">
+                    {% if equipamento.termo_path %}
+                    <a href="{{ url_for('imprimir_termo', id=equipamento.id) }}" class="btn btn-primary" target="_blank">
+                        Termo de Responsabilidade
+                    </a>
+                    {% endif %}
+                    {% if equipamento.termo_devolucao_path %}
+                    <a href="{{ url_for('imprimir_termo_devolucao', id=equipamento.id) }}" class="btn btn-secondary" target="_blank">
+                        Termo de Devolução
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                {% if not equipamento.data_devolucao %}
+                    {% if session['role'] in ['admin', 'main_admin'] %}
+                    <a href="{{ url_for('registrar_baixa', id=equipamento.id) }}" class="btn btn-danger">
+                        Registrar Baixa
+                    </a>
+                    {% endif %}
+                    {% if not equipamento.em_manutencao %}
+                    <a href="{{ url_for('registrar_manutencao', id=equipamento.id) }}" class="btn btn-warning">
+                        Enviar para Manutenção
+                    </a>
+                    {% endif %}
+                {% endif %}
+                {% if equipamento.em_manutencao and session['role'] in ['admin', 'main_admin'] %}
+                <form method="POST" action="{{ url_for('concluir_manutencao', id=equipamento.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-success">Concluir Manutenção</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

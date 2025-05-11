@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Início
+</a>
+    <h2>Equipamentos em Manutenção</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Patrimônio</th>
+                <th>Modelo</th>
+                <th>Responsável</th>
+                <th>Problema</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for equip in equipamentos %}
+            <tr>
+                <td>{{ equip.patrimonio }}</td>
+                <td>{{ equip.modelo }}</td>
+                <td>{{ equip.responsavel.username if equip.responsavel else '--' }}</td>
+                <td>{{ equip.problemas_manutencao[:50] }}...</td>
+                <td>
+                    {% if session['role'] in ['admin', 'main_admin'] %}
+                    <form method="POST" action="{{ url_for('concluir_manutencao', id=equip.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-success">Concluir</button>
+                    </form>
+                    {% endif %}
+                    <a href="{{ url_for('visualizar_equipamento', id=equip.id) }}" class="btn btn-sm btn-info">Detalhes</a>
+                </td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+{% endblock %}

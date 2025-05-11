@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Início
+</a>
+    <h2>Equipamentos Devolvidos</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Patrimônio</th>
+                <th>Modelo</th>
+                <th>Data Devolução</th>
+                <th>Motivo</th>
+                <th>Acessórios</th>
+                <th>Defeito</th>
+                <th>Desconto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for equip in equipamentos %}
+            <tr>
+                <td>{{ equip.patrimonio }}</td>
+                <td>{{ equip.modelo }}</td>
+                <td>{{ equip.data_devolucao.strftime('%d/%m/%Y') }}</td>
+                <td>{{ 'Troca por Defeito' if equip.motivo_devolucao == 'defeito' else 'Demissão' }}</td>
+                <td>{{ equip.acessorios_devolvidos or 'Nenhum' }}</td>
+                <td>{{ equip.defeito_relatado or '--' }}</td>
+                <td>R$ {{ "%.2f"|format(equip.desconto_aplicado) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

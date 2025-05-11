@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block back_button %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Dashboard
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Solicitações de Notebook</h2>
+    
+    {% if session['role'] in ['admin', 'main_admin'] %}
+    <a href="{{ url_for('nova_solicitacao') }}" class="btn btn-success mb-3">+ Nova Solicitação</a>
+    {% endif %}
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Solicitante</th>
+                <th>Destinatário</th>
+                <th>Centro de Custo</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sol in solicitacoes %}
+            <tr>
+                <td>{{ sol.id }}</td>
+                <td>{{ sol.data_solicitacao.strftime('%d/%m/%Y') }}</td>
+                <td>{{ sol.solicitante.username }}</td>
+                <td>{{ sol.destinatario }}</td>
+                <td>{{ sol.centro_custo.codigo }} - {{ sol.centro_custo.descricao }}</td>
+                <td>
+                    <span class="badge bg-{% if sol.status == 'Aprovada' %}success{% elif sol.status == 'Rejeitada' %}danger{% else %}warning{% endif %}">
+                        {{ sol.status }}
+                    </span>
+                </td>
+                <td>
+                    {% if sol.status == 'Pendente' and session['role'] in ['admin', 'main_admin'] %}
+                    <div class="btn-group">
+                        <form method="POST" action="{{ url_for('alterar_status_solicitacao', id=sol.id) }}" style="display: inline;">
+                            <input type="hidden" name="status" value="Aprovada">
+                            <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('alterar_status_solicitacao', id=sol.id) }}" style="display: inline;">
+                            <input type="hidden" name="status" value="Rejeitada">
+                            <button type="submit" class="btn btn-sm btn-danger">Rejeitar</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

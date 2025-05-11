@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block back_button %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Dashboard
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Solicitar Notebook</h2>
+    <form method="POST" action="{{ url_for('nova_solicitacao') }}">
+        <div class="mb-3">
+            <label class="form-label">Data de Solicitação</label>
+            <input type="text" class="form-control" value="{{ datetime.now().strftime('%d/%m/%Y %H:%M') }}" readonly>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Solicitante</label>
+            <input type="text" class="form-control" value="{{ session['username'] }}" readonly>
+        </div>
+        
+        <div class="mb-3">
+            <label for="destinatario" class="form-label">Destinatário</label>
+            <input type="text" class="form-control" id="destinatario" name="destinatario" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="centro_custo" class="form-label">Centro de Custo</label>
+            <select class="form-select" id="centro_custo" name="centro_custo" required>
+                <option value="">Selecione...</option>
+                {% for centro in centros_custo %}
+                <option value="{{ centro.id }}">{{ centro.codigo }} - {{ centro.descricao }}</option>
+                {% endfor %}
+            </select>
+            <small class="text-muted">
+                {% if session['role'] in ['admin', 'main_admin'] %}
+                <a href="{{ url_for('cadastrar_centro_custo') }}">Cadastrar novo centro de custo</a>
+                {% endif %}
+            </small>
+        </div>
+        
+        <div class="mb-3">
+            <label for="observacoes" class="form-label">Observações</label>
+            <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Enviar Solicitação</button>
+    </form>
+</div>
+{% endblock %}

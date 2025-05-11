@@ -1,0 +1,53 @@
+body {
+    background-color: #f8f9fa;
+    padding-top: 50px;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.alert {
+    margin-bottom: 0;
+}
+
+header {
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 2rem;
+}
+
+/* Ajuste para telas pequenas */
+@media (max-width: 768px) {
+    header .d-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+    header img {
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+
+    .btn-flutuante {
+        width: 40px;
+        height: 40px;
+        bottom: 15px !important;
+        right: 15px !important;
+    }
+}
+
+/* Estilos para o botão flutuante */
+.btn-flutuante {
+    transition: all 0.3s ease;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.btn-flutuante:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}

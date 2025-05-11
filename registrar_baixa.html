@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Registrar Baixa - {{ equipamento.patrimonio }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label">Motivo da Baixa</label>
+            <select class="form-select" name="motivo" required>
+                <option value="">Selecione...</option>
+                <option value="defeito">Troca por Defeito</option>
+                <option value="demissao">Devolução por Demissão</option>
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Defeito Relatado (se aplicável)</label>
+            <textarea class="form-control" name="defeito" rows="3"></textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Acessórios Devolvidos</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="carregador_devolvido" id="carregador_devolvido">
+                <label class="form-check-label" for="carregador_devolvido">Carregador</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="mochila_devolvida" id="mochila_devolvida">
+                <label class="form-check-label" for="mochila_devolvida">Mochila</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="mouse_devolvido" id="mouse_devolvido">
+                <label class="form-check-label" for="mouse_devolvido">Mouse</label>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Termo de Devolução (PDF)</label>
+            <input type="file" class="form-control" name="termo_devolucao" accept=".pdf" target="_blank">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Registrar Baixa</button>
+    </form>
+</div>
+{% endblock %}
