@@ -1,41 +1,188 @@
 {% extends "base.html" %}
 
+{% block back_button %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Dashboard
+</a>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-
-    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
-    ← Voltar para o Início
-</a>
-    <h2>Equipamentos em Manutenção</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Patrimônio</th>
-                <th>Modelo</th>
-                <th>Responsável</th>
-                <th>Problema</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for equip in equipamentos %}
-            <tr>
-                <td>{{ equip.patrimonio }}</td>
-                <td>{{ equip.modelo }}</td>
-                <td>{{ equip.responsavel.username if equip.responsavel else '--' }}</td>
-                <td>{{ equip.problemas_manutencao[:50] }}...</td>
-                <td>
-                    {% if session['role'] in ['admin', 'main_admin'] %}
-                    <form method="POST" action="{{ url_for('concluir_manutencao', id=equip.id) }}" style="display: inline;">
-                        <button type="submit" class="btn btn-sm btn-success">Concluir</button>
-                    </form>
-                    {% endif %}
-                    <a href="{{ url_for('visualizar_equipamento', id=equip.id) }}" class="btn btn-sm btn-info">Detalhes</a>
-                </td>
-            </tr>
-            {% endfor %}
-
-        </tbody>
-    </table>
+    <div class="card">
+        <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+            <h4>Histórico de Manutenções</h4>
+            <div class="btn-group">
+                <a href="{{ url_for('lista_manutencoes', status='aberta') }}" 
+                   class="btn btn-{% if status == 'aberta' %}light{% else %}outline-light{% endif %}">
+                    Abertas
+                </a>
+                <a href="{{ url_for('lista_manutencoes', status='realizada') }}" 
+                   class="btn btn-{% if status == 'realizada' %}light{% else %}outline-light{% endif %}">
+                    Realizadas
+                </a>
+                <a href="{{ url_for('lista_manutencoes', status='cancelada') }}" 
+                   class="btn btn-{% if status == 'cancelada' %}light{% else %}outline-light{% endif %}">
+                    Canceladas
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Patrimônio</th>
+                            <th>Modelo</th>
+                            <th>Data Abertura</th>
+                            <th>Status</th>
+                            <th>Responsável</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for manutencao in manutencoes %}
+                        <tr class="{% if manutencao.status == 'cancelada' %}table-secondary{% elif manutencao.status == 'realizada' %}table-success{% else %}table-warning{% endif %}">
+                            <td>{{ manutencao.equipamento.patrimonio }}</td>
+                            <td>{{ manutencao.equipamento.modelo }}</td>
+                            <td>{{ manutencao.data_abertura.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <span class="badge bg-{% if manutencao.status == 'aberta' %}warning{% elif manutencao.status == 'cancelada' %}secondary{% else %}success{% endif %}">
+                                    {{ manutencao.status|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ manutencao.usuario.nome_completo }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#detalhesModal{{ manutencao.id }}">
+                                    <i class="bi bi-eye"></i> Detalhes
+                                </button>
+                                
+                                {% if manutencao.status == 'aberta' and session.get('role') in ['admin', 'main_admin'] %}
+                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#finalizarModal{{ manutencao.id }}">
+                                    <i class="bi bi-check-circle"></i> Finalizar
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        
+                        <!-- Modal de Detalhes -->
+                        <div class="modal fade" id="detalhesModal{{ manutencao.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Detalhes da Manutenção</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Informações Básicas</h6>
+                                                <dl class="row">
+                                                    <dt class="col-sm-4">Equipamento:</dt>
+                                                    <dd class="col-sm-8">{{ manutencao.equipamento.patrimonio }} - {{ manutencao.equipamento.modelo }}</dd>
+                                                    
+                                                    <dt class="col-sm-4">Data Abertura:</dt>
+                                                    <dd class="col-sm-8">{{ manutencao.data_abertura.strftime('%d/%m/%Y %H:%M') }}</dd>
+                                                    
+                                                    <dt class="col-sm-4">Status:</dt>
+                                                    <dd class="col-sm-8">
+                                                        <span class="badge bg-{% if manutencao.status == 'aberta' %}warning{% elif manutencao.status == 'cancelada' %}secondary{% else %}success{% endif %}">
+                                                            {{ manutencao.status|capitalize }}
+                                                        </span>
+                                                    </dd>
+                                                    
+                                                    {% if manutencao.data_fechamento %}
+                                                    <dt class="col-sm-4">Data Fechamento:</dt>
+                                                    <dd class="col-sm-8">{{ manutencao.data_fechamento.strftime('%d/%m/%Y %H:%M') }}</dd>
+                                                    {% endif %}
+                                                </dl>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Detalhes Técnicos</h6>
+                                                <dl class="row">
+                                                    <dt class="col-sm-4">Motivo:</dt>
+                                                    <dd class="col-sm-8">{{ manutencao.motivo }}</dd>
+                                                    
+                                                    {% if manutencao.pecas_trocadas %}
+                                                    <dt class="col-sm-4">Peças Trocadas:</dt>
+                                                    <dd class="col-sm-8">{{ manutencao.pecas_trocadas }}</dd>
+                                                    {% endif %}
+                                                    
+                                                    {% if manutencao.valor_servico %}
+                                                    <dt class="col-sm-4">Valor:</dt>
+                                                    <dd class="col-sm-8">R$ {{ "%.2f"|format(manutencao.valor_servico) }}</dd>
+                                                    {% endif %}
+                                                </dl>
+                                            </div>
+                                        </div>
+                                        {% if manutencao.observacoes %}
+                                        <div class="row mt-3">
+                                            <div class="col-12">
+                                                <h6>Observações</h6>
+                                                <p>{{ manutencao.observacoes }}</p>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Modal de Finalização -->
+                        {% if manutencao.status == 'aberta' and session.get('role') in ['admin', 'main_admin'] %}
+                        <div class="modal fade" id="finalizarModal{{ manutencao.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="POST" action="{{ url_for('atualizar_manutencao', id=manutencao.id) }}?status={{ status }}">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Finalizar Manutenção</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Status</label>
+                                                <select class="form-select" name="status" required>
+                                                    <option value="realizada">Realizada</option>
+                                                    <option value="cancelada">Cancelada</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Peças Trocadas</label>
+                                                <textarea class="form-control" name="pecas_trocadas" rows="2">{{ manutencao.pecas_trocadas or '' }}</textarea>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Valor do Serviço (R$)</label>
+                                                <input type="number" step="0.01" class="form-control" name="valor_servico" 
+                                                       value="{{ manutencao.valor_servico or '' }}">
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Observações</label>
+                                                <textarea class="form-control" name="observacoes" rows="2">{{ manutencao.observacoes or '' }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-success">Salvar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">Nenhuma manutenção encontrada</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

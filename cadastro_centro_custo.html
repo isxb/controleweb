@@ -1,19 +1,138 @@
 {% extends "base.html" %}
 
+{% block back_button %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Dashboard
+</a>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h2>Cadastrar Novo Centro de Custo</h2>
-    <form method="POST" action="{{ url_for('cadastrar_centro_custo') }}">
-        <div class="mb-3">
-            <label for="codigo" class="form-label">Código</label>
-            <input type="text" class="form-control" id="codigo" name="codigo" required>
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Cadastrar Novo Centro de Custo</h4>
+                <i class="bi bi-building" style="font-size: 1.5rem;"></i>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="descricao" class="form-label">Descrição</label>
-            <input type="text" class="form-control" id="descricao" name="descricao" required>
+        <div class="card-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('cadastrar_centro_custo') }}" id="form-centro-custo">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="codigo" class="form-label">Código <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="codigo" name="codigo" required
+                                   placeholder="Ex: 2075" maxlength="20"
+                                   value="{{ request.form.codigo if request.form.codigo }}">
+                            <small class="text-muted">Código único (máx. 20 caracteres)</small>
+                            <div class="invalid-feedback">Por favor, informe um código válido.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label">Descrição <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="descricao" name="descricao" required
+                                   placeholder="Ex: Aciaria" maxlength="100"
+                                   value="{{ request.form.descricao if request.form.descricao }}">
+                            <small class="text-muted">Nome descritivo (máx. 100 caracteres)</small>
+                            <div class="invalid-feedback">Por favor, informe uma descrição válida.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Cadastrar Centro de Custo
+                    </button>
+                    <a href="{{ url_for('lista_colaboradores') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
         </div>
-        <button type="submit" class="btn btn-primary">Salvar</button>
-        <a href="{{ url_for('nova_solicitacao') }}" class="btn btn-secondary">Cancelar</a>
-    </form>
+    </div>
 </div>
+
+<!-- JavaScript para validação do formulário -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('form-centro-custo');
+    
+    // Validação ao enviar o formulário
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        const codigo = document.getElementById('codigo').value.trim();
+        const descricao = document.getElementById('descricao').value.trim();
+        
+        // Validação do código
+        if (codigo === '' || codigo.length > 20) {
+            document.getElementById('codigo').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('codigo').classList.remove('is-invalid');
+        }
+        
+        // Validação da descrição
+        if (descricao === '' || descricao.length > 100) {
+            document.getElementById('descricao').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('descricao').classList.remove('is-invalid');
+        }
+        
+        if (!isValid) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    });
+    
+    // Validação em tempo real
+    document.getElementById('codigo').addEventListener('input', function() {
+        if (this.value.trim().length > 20) {
+            this.value = this.value.substring(0, 20);
+        }
+    });
+    
+    document.getElementById('descricao').addEventListener('input', function() {
+        if (this.value.trim().length > 100) {
+            this.value = this.value.substring(0, 100);
+        }
+    });
+});
+</script>
+
+<style>
+    .card {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border: none;
+    }
+    .card-header {
+        border-bottom: none;
+    }
+    .form-control:focus {
+        border-color: #6f42c1;
+        box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+    }
+    .btn-primary {
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+    }
+    .btn-primary:hover {
+        background-color: #5a32a8;
+        border-color: #5a32a8;
+    }
+</style>
 {% endblock %}

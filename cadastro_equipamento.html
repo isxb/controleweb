@@ -1,83 +1,121 @@
 {% extends "base.html" %}
-
 {% block back_button %}
 <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
     ← Voltar para o Dashboard
 </a>
 {% endblock %}
-
 {% block content %}
 <div class="container mt-4">
     <h2>Cadastro de Equipamento</h2>
-    <form method="POST" enctype="multipart/form-data" action="{{ url_for('cadastrar_equipamento') }}">
+    
+    <form method="POST" id="form-equipamento">
         <div class="row">
+            <!-- Coluna 1: Informações do Equipamento -->
             <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label">Data de Chegada</label>
-                    <input type="datetime-local" class="form-control" name="data_chegada" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Número de Patrimônio</label>
-                    <input type="text" class="form-control" name="patrimonio" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Responsável</label>
-                    <select class="form-select" name="responsavel_id">
-                        <option value="">Selecione...</option>
-                        {% for usuario in usuarios %}
-                        <option value="{{ usuario.id }}">{{ usuario.username }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">CPF do Responsável</label>
-                    <input type="text" class="form-control cpf-input" name="cpf" placeholder="000.000.000-00">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5>Informações do Equipamento</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Data de Chegada <span class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-control" name="data_chegada" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Número de Patrimônio <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="patrimonio" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Modelo do Notebook <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="modelo" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Acessórios</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="carregador" id="carregador">
+                                <label class="form-check-label" for="carregador">Carregador</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="mochila" id="mochila">
+                                <label class="form-check-label" for="mochila">Mochila</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="mouse" id="mouse">
+                                <label class="form-check-label" for="mouse">Mouse</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
+
+            <!-- Coluna 2: Informações do Colaborador -->
             <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label">Matrícula</label>
-                    <input type="text" class="form-control" name="matricula">
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Modelo do Notebook</label>
-                    <input type="text" class="form-control" name="modelo" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Acessórios</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="carregador" id="carregador">
-                        <label class="form-check-label" for="carregador">Carregador</label>
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5>Informações do Colaborador</h5>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="mochila" id="mochila">
-                        <label class="form-check-label" for="mochila">Mochila</label>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Colaborador <span class="text-danger">*</span></label>
+                            <select class="form-select" id="select-colaborador" name="colaborador_id" required>
+                                <option value="">Selecione um colaborador...</option>
+                                {% for colab in colaboradores %}
+                                <option value="{{ colab.id }}"
+                                        data-cpf="{{ colab.cpf }}"
+                                        data-matricula="{{ colab.matricula }}"
+                                        data-centrocusto="{{ colab.centro_custo_id }}"
+                                        data-centrocusto-desc="{{ colab.centro_custo.codigo }} - {{ colab.centro_custo.descricao }}">
+                                    {{ colab.nome_completo }} ({{ colab.funcao }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">CPF <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control cpf-input" name="cpf" id="input-cpf" required readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Matrícula</label>
+                            <input type="text" class="form-control" name="matricula" id="input-matricula" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Centro de Custo</label>
+                            <input type="text" class="form-control" id="display-centrocusto" readonly>
+                            <input type="hidden" name="centro_custo_id" id="hidden-centrocusto">
+                        </div>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="mouse" id="mouse">
-                        <label class="form-check-label" for="mouse">Mouse</label>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Termo de Responsabilidade (PDF)</label>
-                    <input type="file" class="form-control" name="termo" accept=".pdf">
                 </div>
             </div>
         </div>
-        
-        <button type="submit" class="btn btn-primary">Cadastrar Equipamento</button>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="submit" class="btn btn-primary me-md-2">
+                <i class="bi bi-save"></i> Cadastrar Equipamento
+            </button>
+            <a href="{{ url_for('lista_equipamento') }}" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+        </div>
     </form>
 </div>
 
+<!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Elementos do DOM
+    const selectColaborador = document.getElementById('select-colaborador');
+    const inputCpf = document.getElementById('input-cpf');
+    const inputMatricula = document.getElementById('input-matricula');
+    const displayCentroCusto = document.getElementById('display-centrocusto');
+    const hiddenCentroCusto = document.getElementById('hidden-centrocusto');
+
+    // Máscara para CPF
     const cpfInput = document.querySelector('.cpf-input');
     if (cpfInput) {
         cpfInput.addEventListener('input', function(e) {
@@ -89,6 +127,67 @@ document.addEventListener('DOMContentLoaded', function() {
             e.target.value = value;
         });
     }
+
+    // Autopreenchimento ao selecionar colaborador
+    selectColaborador.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            // Preenche CPF e Matrícula
+            inputCpf.value = selectedOption.dataset.cpf || '';
+            inputMatricula.value = selectedOption.dataset.matricula || '';
+            
+            // Atualiza a exibição do centro de custo
+            displayCentroCusto.value = selectedOption.dataset.centrocustoDesc || '';
+            hiddenCentroCusto.value = selectedOption.dataset.centrocusto || '';
+        } else {
+            // Limpa os campos se nenhum colaborador for selecionado
+            inputCpf.value = '';
+            inputMatricula.value = '';
+            displayCentroCusto.value = '';
+            hiddenCentroCusto.value = '';
+        }
+    });
+
+    // Validação do formulário
+    document.getElementById('form-equipamento').addEventListener('submit', function(e) {
+        // Validação adicional pode ser adicionada aqui
+        if (!selectColaborador.value) {
+            e.preventDefault();
+            alert('Por favor, selecione um colaborador');
+            selectColaborador.focus();
+        }
+    });
 });
 </script>
+
+<!-- Opcional: Select2 para melhorar a busca -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#select-colaborador').select2({
+        placeholder: "Selecione um colaborador...",
+        allowClear: true,
+        width: '100%'
+    });
+});
+</script>
+
+<style>
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        padding: 5px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+    .card {
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
 {% endblock %}

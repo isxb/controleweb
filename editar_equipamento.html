@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block back_button %}
+<a href="{{ url_for('lista_equipamento') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para Lista de Equipamentos
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Editar Equipamento - {{ equipamento.patrimonio }}</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Patrimônio</label>
+                            <input type="text" class="form-control" name="patrimonio" 
+                                   value="{{ equipamento.patrimonio }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Modelo</label>
+                            <input type="text" class="form-control" name="modelo" 
+                                   value="{{ equipamento.modelo }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Data de Chegada</label>
+                            <input type="datetime-local" class="form-control" name="data_chegada" 
+                                   value="{{ equipamento.data_chegada.strftime('%Y-%m-%dT%H:%M') }}" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Colaborador</label>
+                            <select class="form-select" name="colaborador_id">
+                                <option value="">Nenhum</option>
+                                {% for colab in colaboradores %}
+                                <option value="{{ colab.id }}" {% if equipamento.responsavel_id == colab.id %}selected{% endif %}>
+                                    {{ colab.nome_completo }} ({{ colab.funcao }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Centro de Custo</label>
+                            <select class="form-select" name="centro_custo_id">
+                                <option value="">Nenhum</option>
+                                {% for centro in centros_custo %}
+                                <option value="{{ centro.id }}" {% if equipamento.centro_custo_id == centro.id %}selected{% endif %}>
+                                    {{ centro.codigo }} - {{ centro.descricao }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">CPF</label>
+                            <input type="text" class="form-control cpf-input" name="cpf" 
+                                   value="{{ equipamento.cpf if equipamento.cpf }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Matrícula</label>
+                            <input type="text" class="form-control" name="matricula" 
+                                   value="{{ equipamento.matricula if equipamento.matricula }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Acessórios</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="carregador" id="carregador" 
+                               {% if equipamento.carregador %}checked{% endif %}>
+                        <label class="form-check-label" for="carregador">Carregador</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="mochila" id="mochila" 
+                               {% if equipamento.mochila %}checked{% endif %}>
+                        <label class="form-check-label" for="mochila">Mochila</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="mouse" id="mouse" 
+                               {% if equipamento.mouse %}checked{% endif %}>
+                        <label class="form-check-label" for="mouse">Mouse</label>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-primary me-md-2">
+                        <i class="bi bi-save"></i> Salvar Alterações
+                    </button>
+                    <a href="{{ url_for('visualizar_equipamento', id=equipamento.id) }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Máscara para CPF
+    const cpfInput = document.querySelector('.cpf-input');
+    if (cpfInput) {
+        cpfInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.substring(0, 11);
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+});
+</script>
+{% endblock %}

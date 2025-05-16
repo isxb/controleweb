@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block back_button %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Dashboard
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Equipamentos em Manutenção</h4>
+                <span class="badge bg-light">{{ equipamentos|length }} em manutenção</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Patrimônio</th>
+                            <th>Modelo</th>
+                            <th>Centro de Custo</th>
+                            <th>Responsável</th>
+                            <th>Data Abertura</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eq in equipamentos %}
+                        <tr>
+                            <td>{{ eq.Equipamento.patrimonio }}</td>
+                            <td>{{ eq.Equipamento.modelo }}</td>
+                            <td>
+                                {% if eq.centro_custo_codigo %}
+                                {{ eq.centro_custo_codigo }} - {{ eq.centro_custo_descricao }}
+                                {% else %}
+                                <span class="text-muted">Não informado</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if eq.Equipamento.responsavel %}
+                                {{ eq.Equipamento.responsavel.nome_completo }}
+                                {% else %}
+                                <span class="text-muted">Não atribuído</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ eq.Equipamento.manutencoes[0].data_abertura.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('visualizar_equipamento', id=eq.Equipamento.id) }}"
+                                    class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye-fill"></i> Visualizar
+                                </a>
+                                <a href="{{ url_for('lista_manutencoes') }}?status=aberta"
+                                    class="btn btn-sm btn-warning">
+                                    <i class="bi bi-tools"></i> Manutenções
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">Nenhum equipamento em manutenção</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

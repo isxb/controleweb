@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block back_button %}
-<a href="{{ url_for('lista_equipamentos') }}" class="btn btn-outline-secondary mb-3">
+<a href="{{ url_for('lista_equipamento') }}" class="btn btn-outline-secondary mb-3">
     ← Voltar para Lista de Equipamentos
 </a>
 {% endblock %}
@@ -9,102 +9,289 @@
 {% block content %}
 <div class="container mt-4">
     <div class="card">
-        <div class="card-header">
-            <h4>Detalhes do Equipamento - {{ equipamento.patrimonio }}</h4>
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Detalhes do Equipamento</h4>
+                <span class="badge bg-{% if equipamento.data_retirada %}danger{% else %}success{% endif %}">
+                    {% if equipamento.data_retirada %}Em Uso{% else %}Disponível{% endif %}
+                </span>
+            </div>
         </div>
         <div class="card-body">
             <div class="row">
+                <!-- Coluna 1: Informações do Equipamento -->
                 <div class="col-md-6">
-                    <p><strong>Modelo:</strong> {{ equipamento.modelo }}</p>
-                    <p><strong>Data de Chegada:</strong> {{ equipamento.data_chegada.strftime('%d/%m/%Y %H:%M') }}</p>
-                    <p><strong>Responsável:</strong> {{ equipamento.responsavel.username if equipamento.responsavel else '--' }}</p>
-                    <p><strong>CPF:</strong> {{ equipamento.cpf|format_cpf }}</p>
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5><i class="bi bi-laptop"></i> Informações do Equipamento</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-4">Patrimônio:</dt>
+                                <dd class="col-sm-8">{{ equipamento.patrimonio }}</dd>
+                                
+                                <dt class="col-sm-4">Modelo:</dt>
+                                <dd class="col-sm-8">{{ equipamento.modelo }}</dd>
+                                
+                                <dt class="col-sm-4">Data de Chegada:</dt>
+                                <dd class="col-sm-8">{{ equipamento.data_chegada.strftime('%d/%m/%Y') }}</dd>
+                                
+                                <dt class="col-sm-4">Centro de Custo:</dt>
+                                <dd class="col-sm-8">
+                                    {% if equipamento.centro_custo %}
+                                        {{ equipamento.centro_custo.codigo }} - {{ equipamento.centro_custo.descricao }}
+                                    {% else %}
+                                        <span class="text-muted">Não informado</span>
+                                    {% endif %}
+                                </dd>
+                                
+                                <dt class="col-sm-4">Acessórios:</dt>
+                                <dd class="col-sm-8">
+                                    {% if equipamento.carregador %}<span class="badge bg-secondary">Carregador</span>{% endif %}
+                                    {% if equipamento.mochila %}<span class="badge bg-secondary">Mochila</span>{% endif %}
+                                    {% if equipamento.mouse %}<span class="badge bg-secondary">Mouse</span>{% endif %}
+                                    {% if not equipamento.carregador and not equipamento.mochila and not equipamento.mouse %}
+                                        <span class="text-muted">Nenhum acessório registrado</span>
+                                    {% endif %}
+                                </dd>
+                                
+                                {% if equipamento.termo_path %}
+                                <dt class="col-sm-4">Termo:</dt>
+                                <dd class="col-sm-8">
+                                    <a href="{{ url_for('imprimir_termo', id=equipamento.id) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-file-earmark-pdf"></i> Visualizar Termo
+                                    </a>
+                                </dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Coluna 2: Informações do Responsável -->
                 <div class="col-md-6">
-                    <p><strong>Matrícula:</strong> {{ equipamento.matricula if equipamento.matricula else '--' }}</p>
-                    <p><strong>Status:</strong>
-                        {% if equipamento.em_manutencao %}
-                            <span class="badge bg-warning">Em Manutenção</span>
-                        {% elif equipamento.data_retirada %}
-                            <span class="badge bg-success">Em uso</span>
-                        {% else %}
-                            <span class="badge bg-info">Disponível</span>
-                        {% endif %}
-                    </p>
-                    <p><strong>Acessórios:</strong>
-                        {% if equipamento.carregador %}<span class="badge bg-secondary">Carregador</span>{% endif %}
-                        {% if equipamento.mochila %}<span class="badge bg-secondary">Mochila</span>{% endif %}
-                        {% if equipamento.mouse %}<span class="badge bg-secondary">Mouse</span>{% endif %}
-                    </p>
-                </div>
-            </div>
-            
-            {% if equipamento.data_devolucao %}
-            <div class="mt-4">
-                <h5>Informações de Devolução</h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Data Devolução:</strong> {{ equipamento.data_devolucao.strftime('%d/%m/%Y %H:%M') }}</p>
-                        <p><strong>Motivo:</strong> {{ 'Troca por Defeito' if equipamento.motivo_devolucao == 'defeito' else 'Devolução por Demissão' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Acessórios Devolvidos:</strong> {{ equipamento.acessorios_devolvidos or 'Nenhum' }}</p>
-                        <p><strong>Desconto Aplicado:</strong> R$ {{ "%.2f"|format(equipamento.desconto_aplicado) }}</p>
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5><i class="bi bi-person-badge"></i> Informações do Responsável</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                {% if equipamento.responsavel %}
+                                    <dt class="col-sm-4">Nome:</dt>
+                                    <dd class="col-sm-8">{{ equipamento.responsavel.nome_completo }}</dd>
+                                    
+                                    <dt class="col-sm-4">CPF:</dt>
+                                    <dd class="col-sm-8">{{ equipamento.responsavel.cpf|format_cpf }}</dd>
+                                    
+                                    <dt class="col-sm-4">Matrícula:</dt>
+                                    <dd class="col-sm-8">{{ equipamento.responsavel.matricula or '-' }}</dd>
+                                    
+                                    <dt class="col-sm-4">Função:</dt>
+                                    <dd class="col-sm-8">{{ equipamento.responsavel.funcao }}</dd>
+                                {% else %}
+                                    <dd class="col-sm-12 text-muted">Nenhum responsável atribuído</dd>
+                                {% endif %}
+                            </dl>
+                        </div>
                     </div>
                 </div>
-                {% if equipamento.defeito_relatado %}
-                <div class="mt-2">
-                    <p><strong>Defeito Relatado:</strong></p>
-                    <p>{{ equipamento.defeito_relatado }}</p>
-                </div>
-                {% endif %}
             </div>
-            {% endif %}
-            
-            {% if equipamento.em_manutencao %}
-            <div class="mt-4">
-                <h5>Informações de Manutenção</h5>
-                <p><strong>Problema Relatado:</strong></p>
-                <p>{{ equipamento.problemas_manutencao }}</p>
-            </div>
-            {% endif %}
-            
-            <div class="mt-4">
-                <h5>Documentos</h5>
-                <div class="btn-group">
-                    {% if equipamento.termo_path %}
-                    <a href="{{ url_for('imprimir_termo', id=equipamento.id) }}" class="btn btn-primary" target="_blank">
-                        Termo de Responsabilidade
-                    </a>
+
+            <!-- Seção de Ações -->
+            <div class="d-flex justify-content-end mt-3">
+                {% if session.get('role') in ['admin', 'main_admin'] %}
+                    {% if equipamento.data_retirada %}
+                        <form method="POST" action="{{ url_for('registrar_devolucao', id=equipamento.id) }}" class="me-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-box-arrow-in-down"></i> Registrar Devolução
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('registrar_retirada', id=equipamento.id) }}" class="me-2">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-box-arrow-up"></i> Registrar Retirada
+                            </button>
+                        </form>
                     {% endif %}
-                    {% if equipamento.termo_devolucao_path %}
-                    <a href="{{ url_for('imprimir_termo_devolucao', id=equipamento.id) }}" class="btn btn-secondary" target="_blank">
-                        Termo de Devolução
+                    <a href="{{ url_for('editar_equipamento', id=equipamento.id) }}" class="btn btn-primary me-2">
+                        <i class="bi bi-pencil"></i> Editar
                     </a>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="mt-4">
-                {% if not equipamento.data_devolucao %}
-                    {% if session['role'] in ['admin', 'main_admin'] %}
-                    <a href="{{ url_for('registrar_baixa', id=equipamento.id) }}" class="btn btn-danger">
-                        Registrar Baixa
+                    <a href="{{ url_for('registrar_manutencao', id=equipamento.id) }}" class="btn btn-warning me-2">
+                        <i class="bi bi-tools"></i> Manutenção
                     </a>
-                    {% endif %}
-                    {% if not equipamento.em_manutencao %}
-                    <a href="{{ url_for('registrar_manutencao', id=equipamento.id) }}" class="btn btn-warning">
-                        Enviar para Manutenção
-                    </a>
-                    {% endif %}
-                {% endif %}
-                {% if equipamento.em_manutencao and session['role'] in ['admin', 'main_admin'] %}
-                <form method="POST" action="{{ url_for('concluir_manutencao', id=equipamento.id) }}" style="display: inline;">
-                    <button type="submit" class="btn btn-success">Concluir Manutenção</button>
-                </form>
                 {% endif %}
             </div>
         </div>
     </div>
+
+    <!-- Seção de Manutenções -->
+    <div class="card mt-4">
+        <div class="card-header bg-warning text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-tools"></i> Histórico de Manutenções</h5>
+                <span class="badge bg-light text-dark">{{ equipamento.manutencoes|length }} registros</span>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if equipamento.manutencoes %}
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Status</th>
+                            <th>Motivo</th>
+                            <th>Responsável</th>
+                            <th>Valor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for manutencao in equipamento.manutencoes|sort(attribute='data_abertura', reverse=True) %}
+                        <tr class="{% if manutencao.status == 'cancelada' %}table-secondary{% elif manutencao.status == 'realizada' %}table-success{% else %}table-warning{% endif %}">
+                            <td>{{ manutencao.data_abertura.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <span class="badge bg-{% if manutencao.status == 'aberta' %}warning{% elif manutencao.status == 'cancelada' %}secondary{% else %}success{% endif %}">
+                                    {{ manutencao.status|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ manutencao.motivo|truncate(30) }}</td>
+                            <td>{{ manutencao.usuario.nome_completo }}</td>
+                            <td>
+                                {% if manutencao.valor_servico %}
+                                    R$ {{ "%.2f"|format(manutencao.valor_servico) }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#manutencaoModal{{ manutencao.id }}">
+                                    <i class="bi bi-eye"></i> Detalhes
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i> Nenhuma manutenção registrada para este equipamento.
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
+
+<!-- Modais de Manutenção -->
+{% for manutencao in equipamento.manutencoes %}
+<div class="modal fade" id="manutencaoModal{{ manutencao.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Manutenção</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Informações Básicas</h6>
+                        <dl class="row">
+                            <dt class="col-sm-4">Equipamento:</dt>
+                            <dd class="col-sm-8">{{ equipamento.patrimonio }} - {{ equipamento.modelo }}</dd>
+                            
+                            <dt class="col-sm-4">Data Abertura:</dt>
+                            <dd class="col-sm-8">{{ manutencao.data_abertura.strftime('%d/%m/%Y %H:%M') }}</dd>
+                            
+                            {% if manutencao.data_fechamento %}
+                            <dt class="col-sm-4">Data Fechamento:</dt>
+                            <dd class="col-sm-8">{{ manutencao.data_fechamento.strftime('%d/%m/%Y %H:%M') }}</dd>
+                            {% endif %}
+                            
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-{% if manutencao.status == 'aberta' %}warning{% elif manutencao.status == 'cancelada' %}secondary{% else %}success{% endif %}">
+                                    {{ manutencao.status|capitalize }}
+                                </span>
+                            </dd>
+                            
+                            <dt class="col-sm-4">Registrado por:</dt>
+                            <dd class="col-sm-8">{{ manutencao.usuario.nome_completo }}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Detalhes Técnicos</h6>
+                        <dl class="row">
+                            <dt class="col-sm-4">Motivo:</dt>
+                            <dd class="col-sm-8">{{ manutencao.motivo }}</dd>
+                            
+                            {% if manutencao.pecas_trocadas %}
+                            <dt class="col-sm-4">Peças Trocadas:</dt>
+                            <dd class="col-sm-8">{{ manutencao.pecas_trocadas }}</dd>
+                            {% endif %}
+                            
+                            {% if manutencao.valor_servico %}
+                            <dt class="col-sm-4">Valor:</dt>
+                            <dd class="col-sm-8">R$ {{ "%.2f"|format(manutencao.valor_servico) }}</dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                {% if manutencao.observacoes %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Observações</h6>
+                        <div class="bg-light p-3 rounded">
+                            {{ manutencao.observacoes }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                {% if manutencao.status == 'aberta' and session.get('role') in ['admin', 'main_admin'] %}
+                <form method="POST" action="{{ url_for('atualizar_manutencao', id=manutencao.id) }}" class="me-2">
+                    <input type="hidden" name="status" value="realizada">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Marcar como Realizada
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('atualizar_manutencao', id=manutencao.id) }}">
+                    <input type="hidden" name="status" value="cancelada">
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar Manutenção
+                    </button>
+                </form>
+                {% endif %}
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<style>
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        border: none;
+    }
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+        padding: 15px 20px;
+    }
+    .table th {
+        background-color: #f8f9fa;
+    }
+    .badge {
+        font-size: 0.85em;
+        padding: 5px 8px;
+    }
+    .modal-content {
+        border-radius: 10px;
+    }
+</style>
 {% endblock %}

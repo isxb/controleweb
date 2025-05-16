@@ -51,3 +51,34 @@ header {
     transform: scale(1.1);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
 }
+
+
+.select2-container--bootstrap5 .select2-selection {
+    height: auto;
+    min-height: 38px;
+    padding: .375rem .75rem;
+}
+
+.select2-container--bootstrap5 .select2-selection--single {
+    padding: .375rem 2.25rem .375rem .75rem;
+}
+
+
+.btn-action-group {
+    display: flex;
+    gap: 4px;
+    flex-wrap: nowrap;
+}
+
+.btn-action-icon {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.875rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-action-icon i {
+    margin: 0;
+}

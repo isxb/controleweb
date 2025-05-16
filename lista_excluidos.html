@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+
+{% block back_button %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Dashboard
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Equipamentos Excluídos</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Patrimônio</th>
+                            <th>Modelo</th>
+                            <th>Excluído por</th>
+                            <th>Data Exclusão</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in excluidos %}
+                        <tr>
+                            <td>{{ item.patrimonio }}</td>
+                            <td>{{ item.modelo }}</td>
+                            <td>{{ item.usuario.username }}</td>
+                            <td>{{ item.data_exclusao.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#detalhesModal{{ item.id }}">
+                                    Ver Detalhes
+                                </button>
+                                
+                                <!-- Modal de Detalhes -->
+                                <div class="modal fade" id="detalhesModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Detalhes do Equipamento Excluído</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h6>Informações do Equipamento</h6>
+                                                        <dl class="row">
+                                                            <dt class="col-sm-4">Patrimônio:</dt>
+                                                            <dd class="col-sm-8">{{ item.patrimonio }}</dd>
+                                                            
+                                                            <dt class="col-sm-4">Modelo:</dt>
+                                                            <dd class="col-sm-8">{{ item.modelo }}</dd>
+                                                            
+                                                            <dt class="col-sm-4">Data Exclusão:</dt>
+                                                            <dd class="col-sm-8">{{ item.data_exclusao.strftime('%d/%m/%Y %H:%M') }}</dd>
+                                                            
+                                                            <dt class="col-sm-4">Excluído por:</dt>
+                                                            <dd class="col-sm-8">{{ item.usuario.username }}</dd>
+                                                            
+                                                            <dt class="col-sm-4">Motivo:</dt>
+                                                            <dd class="col-sm-8">{{ item.motivo }}</dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6>Documentos</h6>
+                                                        {% if item.equipamento and item.equipamento.termo_path %}
+                                                        <div class="mb-3">
+                                                            <a href="{{ url_for('imprimir_termo', id=item.equipamento.id) }}" 
+                                                               class="btn btn-outline-primary" target="_blank">
+                                                                Visualizar Termo de Responsabilidade (PDF)
+                                                            </a>
+                                                        </div>
+                                                        {% else %}
+                                                        <p class="text-muted">Nenhum documento disponível</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhum equipamento excluído encontrado</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

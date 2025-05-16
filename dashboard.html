@@ -3,93 +3,225 @@
 {% block content %}
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Bem-vindo, {{ username }}!</h2>
-    </div>
-
-    {% if session['role'] in ['admin', 'main_admin'] %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>Controle de Notebooks</h4>
-        </div>
-        <div class="card-body">
-            <div class="d-grid gap-2">
-                <a href="{{ url_for('nova_solicitacao') }}" class="btn btn-outline-primary">
-                    Solicitar Notebook
-                </a>
-                {% if session['role'] == 'main_admin' %}
-                <a href="{{ url_for('admin_usuarios') }}" class="btn btn-outline-danger">
-                    Painel de Administração
-                </a>
+        <h2>Bem-vindo, {{ session['nome_completo'] }}!</h2>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dashboardMenu"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-gear-fill"></i> Ações Rápidas
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dashboardMenu">
+                {% if session['role'] in ['admin', 'main_admin'] %}
+                <li><a class="dropdown-item" href="{{ url_for('cadastrar_equipamento') }}"><i class="bi bi-laptop"></i>
+                        Novo Equipamento</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('novo_colaborador') }}"><i class="bi bi-person-plus"></i>
+                        Novo Colaborador</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="card">
-        <div class="card-header">
-            <h4>Lista de Solicitações</h4>
-        </div>
-        <div class="card-body">
-            <a href="{{ url_for('lista_solicitacoes') }}" class="btn btn-primary">
-                Visualizar Solicitações
-            </a>
+                <li><a class="dropdown-item" href="{{ url_for('lista_equipamento') }}"><i class="bi bi-list-ul"></i> Ver
+                        Equipamentos</a></li>
+                {% if session['role'] in ['admin', 'main_admin'] %}
+                <li><a class="dropdown-item" href="{{ url_for('lista_colaboradores') }}"><i class="bi bi-people"></i>
+                        Ver Colaboradores</a></li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 
-    {% if session['role'] in ['admin', 'main_admin'] %}
-    <div class="card mt-4">
-        <div class="card-header">
-            <h4>Status das Solicitações</h4>
+    <!-- Cards de Status -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">COLABORADORES</h6>
+                            <h2 class="mb-0">{{ total_colaboradores }}</h2>
+                        </div>
+                        <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <a href="{{ url_for('lista_colaboradores') }}" class="stretched-link"></a>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="alert alert-warning">
-                        <strong>Pendentes:</strong> {{ pendentes }}
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">EQUIPAMENTOS DISPONÍVEIS</h6>
+                            <h2 class="mb-0">{{ disponiveis }}</h2>
+                        </div>
+                        <i class="bi bi-check-circle-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <a href="{{ url_for('lista_equipamento') }}?status=Disponível" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">PENDÊNCIAS</h6>
+                            <h2 class="mb-0">{{ pendentes }}</h2>
+                        </div>
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <a href="{{ url_for('lista_solicitacoes') }}?status=Pendente" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Acesso Rápido -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="bi bi-laptop"></i> Gestão de Equipamentos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('cadastrar_equipamento') }}" class="btn btn-outline-primary text-start">
+                            <i class="bi bi-plus-circle"></i> Cadastrar Novo Equipamento
+                        </a>
+                        <a href="{{ url_for('lista_equipamento') }}" class="btn btn-outline-secondary text-start">
+                            <i class="bi bi-list-ul"></i> Lista Completa de Equipamentos
+                        </a>
+                        <a href="{{ url_for('lista_equipamentos_excluidos') }}"
+                            class="btn btn-outline-warning text-start">
+                            <i class="bi bi-trash"></i> Equipamentos Excluídos
+                        </a>
+                        <a href="{{ url_for('equipamentos_em_manutencao') }}"
+                            class="btn btn-outline-warning text-start">
+                            <i class="bi bi-tools"></i> Equipamentos em Manutenção
+                        </a>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="alert alert-success">
-                        <strong>Aprovadas:</strong> {{ aprovadas }}
-                    </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-purple text-white">
+                    <h5><i class="bi bi-people-fill"></i> Gestão de Colaboradores</h5>
                 </div>
-                <div class="col-md-4">
-                    <div class="alert alert-danger">
-                        <strong>Rejeitadas:</strong> {{ rejeitadas }}
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('novo_colaborador') }}" class="btn btn-outline-primary text-start">
+                            <i class="bi bi-person-plus"></i> Cadastrar Novo Colaborador
+                        </a>
+                        <a href="{{ url_for('lista_colaboradores') }}" class="btn btn-outline-secondary text-start">
+                            <i class="bi bi-list-ul"></i> Lista de Colaboradores
+                        </a>
+                        <a href="{{ url_for('cadastrar_centro_custo') }}" class="btn btn-outline-info text-start">
+                            <i class="bi bi-building"></i> Gerenciar Centros de Custo
+                        </a>
+                        {% if session['role'] == 'main_admin' %}
+                        <a href="{{ url_for('admin_usuarios') }}" class="btn btn-outline-dark text-start">
+                            <i class="bi bi-gear"></i> Administração de Usuários
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-<div class="card mt-4">
-        <div class="card-header">
-            <h4>Controle de Equipamentos</h4>
-        </div>
-        <div class="card-body">
-            <div class="d-grid gap-2">
-                <a href="{{ url_for('cadastrar_equipamento') }}" class="btn btn-outline-primary">Cadastrar Equipamento</a>
-                <a href="{{ url_for('lista_equipamentos') }}" class="btn btn-outline-secondary">Listar Equipamentos</a>
-                  <a href="{{ url_for('lista_equipamentos_devolvidos') }}" class="btn btn-outline-info">
-                Equipamentos Devolvidos</a>
+    <!-- Últimos Registros -->
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="bi bi-clock-history"></i> Últimos Equipamentos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <tbody>
+                                {% for eq in ultimos_equipamentos %}
+                                <tr onclick="window.location='{{ url_for('visualizar_equipamento', id=eq.id) }}'"
+                                    style="cursor: pointer;">
+                                    <td>{{ eq.patrimonio }}</td>
+                                    <td>{{ eq.modelo }}</td>
+                                    <td><span
+                                            class="badge bg-{% if eq.data_retirada %}danger{% else %}success{% endif %}">
+                                            {% if eq.data_retirada %}Em Uso{% else %}Disponível{% endif %}
+                                        </span></td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center">Nenhum equipamento cadastrado</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    
-<div class="card mt-4">
-    <div class="card-header">
-        <h4>Controle de Manutenção</h4>
-    </div>
-    <div class="card-body">
-        <div class="d-grid gap-2">
-            <a href="{{ url_for('lista_manutencoes') }}" class="btn btn-outline-warning">
-                Lista de Manutenções
-            </a>
-    
+
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="bi bi-person-lines-fill"></i> Últimos Colaboradores</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <tbody>
+                                {% for colab in ultimos_colaboradores %}
+                                <tr onclick="window.location='#'" style="cursor: pointer;">
+                                    <td>{{ colab.nome_completo }}</td>
+                                    <td>{{ colab.funcao }}</td>
+                                    <td>{{ colab.centro_custo.codigo if colab.centro_custo else '-' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center">Nenhum colaborador cadastrado</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-    {% endif %}
-</div>
+
+<style>
+    .bg-purple {
+        background-color: #6f42c1;
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-sm td {
+        padding: 0.5rem;
+    }
+
+    [class^="bi-"] {
+        margin-right: 8px;
+    }
+
+    .btn-outline-primary {
+        color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+</style>
 {% endblock %}

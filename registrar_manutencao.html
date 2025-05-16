@@ -1,14 +1,54 @@
 {% extends "base.html" %}
 
+{% block back_button %}
+<a href="{{ url_for('lista_equipamento') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para Lista de Equipamentos
+</a>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h2>Registrar Manutenção - {{ equipamento.patrimonio }}</h2>
-    <form method="POST">
-        <div class="mb-3">
-            <label class="form-label">Problema Relatado</label>
-            <textarea class="form-control" name="problema" rows="5" required></textarea>
+    <div class="card">
+        <div class="card-header bg-warning text-white">
+            <h4>Registrar Manutenção - {{ equipamento.patrimonio }} ({{ equipamento.modelo }})</h4>
         </div>
-        <button type="submit" class="btn btn-warning">Enviar para Manutenção</button>
-    </form>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="motivo" class="form-label">Motivo <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="motivo" name="motivo" rows="3" required></textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="pecas_trocadas" class="form-label">Peças Trocadas</label>
+                            <textarea class="form-control" id="pecas_trocadas" name="pecas_trocadas" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="valor_servico" class="form-label">Valor do Serviço (R$)</label>
+                            <input type="number" step="0.01" class="form-control" id="valor_servico" name="valor_servico">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="observacoes" class="form-label">Observações</label>
+                    <textarea class="form-control" id="observacoes" name="observacoes" rows="2"></textarea>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-tools"></i> Registrar Manutenção
+                    </button>
+                    <a href="{{ url_for('lista_equipamento') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

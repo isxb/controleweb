@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block back_button %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+    ← Voltar para o Dashboard
+</a>
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Cadastrar Novo Colaborador</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Nome Completo</label>
+                            <input type="text" class="form-control" name="nome_completo" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">CPF</label>
+                            <input type="text" class="form-control cpf-input" name="cpf" required>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Matrícula (Opcional)</label>
+                            <input type="text" class="form-control" name="matricula">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Função</label>
+                            <input type="text" class="form-control" name="funcao" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Centro de Custo</label>
+                    <select class="form-select" name="centro_custo_id" required>
+                        <option value="">Selecione...</option>
+                        {% for centro in centros_custo %}
+                        <option value="{{ centro.id }}">{{ centro.codigo }} - {{ centro.descricao }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Cadastrar
+                    </button>
+                    <a href="{{ url_for('lista_colaboradores') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Máscara para CPF
+    const cpfInput = document.querySelector('.cpf-input');
+    cpfInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = value.substring(0, 11);
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        e.target.value = value;
+    });
+});
+</script>
+{% endblock %}
